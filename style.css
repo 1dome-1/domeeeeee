@@ -88,6 +88,31 @@ canvas {
   display: block;
 }
 
+.fullscreen-control {
+  text-align: center;
+  margin-top: 4px;
+}
+
+#btn-fullscreen {
+  padding: 10px 24px;
+  background: var(--line);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.1s ease;
+  box-shadow: 0 4px 12px rgba(56, 189, 248, 0.2);
+}
+
+#btn-fullscreen:hover {
+  background: #0284c7;
+}
+
+#btn-fullscreen:active {
+  transform: scale(0.98);
+}
+
 .hint {
   text-align: center;
   font-size: 0.85rem;
