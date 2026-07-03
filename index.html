@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Crystal Hunter RPG — Bugfix Build</title>
+  <title>Crystal Hunter RPG — Character Visual Update</title>
   <style>
     :root {
       color-scheme: dark;
@@ -86,7 +86,6 @@
       display: block;
     }
 
-    /* แผงควบคุมปุ่มกดในเกม */
     .controls-panel {
       display: flex;
       justify-content: space-between;
@@ -138,7 +137,7 @@
   <div class="game-shell">
     <header class="topbar">
       <div>
-        <p class="eyebrow">Production Stable Build</p>
+        <p class="eyebrow">Character Visual Patch</p>
         <h1>Crystal Hunter RPG</h1>
       </div>
       <div class="status-pill" id="game-status">ระบบพร้อมใช้งาน</div>
@@ -155,13 +154,13 @@
         <button id="btn-dash" class="btn-blue" style="background: #475569;">💨 แดชหลบ (Shift)</button>
       </div>
       <div class="btn-group">
-        <button id="btn-shop" class="btn-gold">🛒 อัปเกรด & ร้านค้า (P)</button>
+        <button id="btn-shop" class="btn-gold">🛒 ร้านค้าอัปเกรด (P)</button>
         <button id="btn-fullscreen" class="btn-blue" style="background: #1e293b; border: 1px solid var(--line);">🖥️ เต็มจอ</button>
       </div>
     </div>
     
     <div class="hint">
-      <strong>[วิธีเล่นควบคุม]:</strong> เดินลื่นไหลด้วยปุ่ม <b>W, A, S, D หรือ ปุ่มลูกศร</b> คีย์บอร์ด • เล็งทิศทางโจมตีด้วยการขยับเมาส์
+      <strong>[ควบคุม]:</strong> เดินด้วยปุ่ม <b>W, A, S, D</b> (ลื่นไหลแบบเกมปกติ) • เล็งทิศทางโจมตีด้วยเมาส์
     </div>
   </div>
 
@@ -170,16 +169,16 @@
     const ctx = canvas.getContext("2d");
     const statusPill = document.getElementById("game-status");
 
-    // โครงสร้างสถานะเกมหลัก
     let state = {
-      screen: "START", // START, PLAYING, GAMEOVER, VICTORY
+      screen: "START", 
       player: {
-        x: 480, y: 450, size: 32,
+        x: 480, y: 450, size: 36,
         hp: 100, maxHp: 100,
         mana: 60, maxMana: 60,
         stamina: 100, maxStamina: 100,
-        gold: 150, score: 0, speed: 5, level: 1, exp: 0, nextLevelExp: 100,
-        baseDamage: 20, skillDamage: 50
+        gold: 150, score: 0, speed: 5.5, level: 1, exp: 0, nextLevelExp: 100,
+        baseDamage: 20, skillDamage: 50,
+        angle: 0
       },
       projectiles: [],
       enemies: [],
@@ -191,27 +190,25 @@
       dashCooldown: 0
     };
 
-    // ล้างและประกาศชุดคีย์บอร์ดรับข้อมูล
     let keyState = {};
-    const mouse = { x: 480, y: 150 }; // ค่าเริ่มต้นของเมาส์ให้อยู่กลางจอค่อนไปทางบน
+    const mouse = { x: 480, y: 150 };
     let lastAttackTime = 0;
 
-    // ล้างสถานะคีย์ทั้งหมดเมื่อต้องการป้องกันบั๊กเดินค้าง
     function clearInputs() {
       keyState = {};
     }
 
-    // ฟังก์ชันเริ่มเกมใหม่/รีเซ็ตค่าเริ่มต้น
     function initGame() {
       clearInputs();
       state.screen = "PLAYING";
       state.player = {
-        x: 480, y: 450, size: 32,
+        x: 480, y: 450, size: 36,
         hp: 100, maxHp: 100,
         mana: 60, maxMana: 60,
         stamina: 100, maxStamina: 100,
-        gold: 150, score: 0, speed: 5, level: 1, exp: 0, nextLevelExp: 100,
-        baseDamage: 20, skillDamage: 50
+        gold: 150, score: 0, speed: 5.5, level: 1, exp: 0, nextLevelExp: 100,
+        baseDamage: 20, skillDamage: 50,
+        angle: 0
       };
       state.projectiles = [];
       state.enemies = [];
@@ -235,7 +232,7 @@
       return {
         x: Math.random() * (canvas.width - 40),
         y: Math.random() * 200 + 50,
-        size: isMini ? 44 : 28,
+        size: isMini ? 46 : 30,
         hp: isMini ? 150 : 40,
         maxHp: isMini ? 150 : 40,
         isBoss: false,
@@ -269,14 +266,12 @@
       }
     }
 
-    // ฟังก์ชันยิง/โจมตี (fromButton = จริง เมื่อเรียกจากปุ่มกระตุ้นข้างนอกเพื่อแก้ทิศทาง)
     function performAttack(fromButton = false) {
       if (state.screen !== "PLAYING" || state.showUpgradeMenu) return;
       const now = Date.now();
       if (now - lastAttackTime < 250) return;
       lastAttackTime = now;
 
-      // แก้บั๊กวิถีกระสุนเพี้ยน: ถ้ากดปุ่มให้พุ่งตรงไปข้างหน้าทันที
       let targetX = fromButton ? (state.player.x + state.player.size / 2) : mouse.x;
       let targetY = fromButton ? (state.player.y - 200) : mouse.y;
 
@@ -295,7 +290,7 @@
     }
 
     function performSkill(fromButton = false) {
-      if (state.screen !== "PLAYING") return;
+      if (state.screen !== "PLAYING" || state.showUpgradeMenu) return;
       if (state.player.mana >= 15) {
         state.player.mana -= 15;
         let targetX = fromButton ? (state.player.x + state.player.size / 2) : mouse.x;
@@ -312,7 +307,7 @@
             vx: (dx / len) * 14, vy: (dy / len) * 14,
             size: 10, damage: state.player.skillDamage, isSkill: true
           });
-          createParticle(state.player.x, state.player.y, "#a855f7", 8, "⚡ SKILL SHOT");
+          createParticle(state.player.x, state.player.y, "#a855f7", 8, "⚡ SKILL!");
         }
       }
     }
@@ -330,10 +325,10 @@
 
         const moveLen = Math.sqrt(dx*dx + dy*dy);
         if (moveLen > 0) {
-          state.player.x += (dx / moveLen) * 55;
-          state.player.y += (dy / moveLen) * 55;
+          state.player.x += (dx / moveLen) * 60;
+          state.player.y += (dy / moveLen) * 60;
         } else {
-          state.player.y -= 55;
+          state.player.y -= 60;
         }
         createParticle(state.player.x, state.player.y, "#e2e8f0", 10, "💨 DASH!");
       }
@@ -342,7 +337,7 @@
     function update() {
       if (state.screen !== "PLAYING") return;
 
-      // ตรวจสอบระบบเดินปุ่มกด WASD / Arrow อย่างลื่นไหลแม่นยำ
+      // แก้บั๊กปุ่มเดินหน่วง/ค้าง: ตรวจจับสเตตัสคีย์สดแบบเรียลไทม์
       let dx = 0, dy = 0;
       if (keyState["w"] || keyState["arrowup"]) dy = -1;
       if (keyState["s"] || keyState["arrowdown"]) dy = 1;
@@ -355,15 +350,19 @@
         state.player.y += (dy / len) * state.player.speed;
       }
 
-      // ล็อกกรอบไม่ให้ตัวละครเดินหลุดทะลุขอบแผนที่ของ Canvas
       state.player.x = Math.max(0, Math.min(canvas.width - state.player.size, state.player.x));
       state.player.y = Math.max(0, Math.min(canvas.height - state.player.size, state.player.y));
 
-      if (state.player.mana < state.player.maxMana) state.player.mana += 0.1;
-      if (state.player.stamina < state.player.maxStamina) state.player.stamina += 0.3;
+      // คำนวณองศาหน้าตาตัวละครให้หันตามเมาส์
+      const pCenterX = state.player.x + state.player.size / 2;
+      const pCenterY = state.player.y + state.player.size / 2;
+      state.player.angle = Math.atan2(mouse.y - pCenterY, mouse.x - pCenterX);
+
+      if (state.player.mana < state.player.maxMana) state.player.mana += 0.12;
+      if (state.player.stamina < state.player.maxStamina) state.player.stamina += 0.35;
       if (state.dashCooldown > 0) state.dashCooldown--;
 
-      // ประมวลผลกระสุนพลังงาน
+      // ประมวลผลกระสุน
       for (let i = state.projectiles.length - 1; i >= 0; i--) {
         const p = state.projectiles[i];
         p.x += p.vx; p.y += p.vy;
@@ -399,7 +398,7 @@
                   state.player.baseDamage += 5;
                   state.player.skillDamage += 12;
                   state.dungeonLevel = Math.min(5, state.dungeonLevel + 1);
-                  createParticle(state.player.x, state.player.y, "#34d399", 15, "🎉 LEVEL UP!");
+                  createParticle(state.player.x, state.player.y, "#34d399", 15, "🎉 LV UP!");
                 }
               }
               state.enemies.splice(j, 1);
@@ -409,7 +408,7 @@
         }
       }
 
-      // มอนสเตอร์ติดตามโจมตีผู้เล่น
+      // ศัตรูเคลื่อนที่โจมตี
       state.enemies.forEach(e => {
         const px = state.player.x + state.player.size/2;
         const py = state.player.y + state.player.size/2;
@@ -424,23 +423,23 @@
 
         if (state.player.x < e.x + e.size && state.player.x + state.player.size > e.x &&
             state.player.y < e.y + e.size && state.player.y + state.player.size > e.y) {
-          state.player.hp = Math.max(0, state.player.hp - (e.isBoss ? 1.2 : 0.4));
+          state.player.hp = Math.max(0, state.player.hp - (e.isBoss ? 1.5 : 0.5));
           if (state.player.hp <= 0) {
             state.screen = "GAMEOVER";
             clearInputs();
-            statusPill.textContent = "จบเกม (ผู้ล่าพ่ายแพ้)";
+            statusPill.textContent = "จบเกม (พ่ายแพ้)";
           }
         }
       });
 
-      // เก็บผลึกคริสตัล
+      // เก็บผลึก
       for (let i = state.crystals.length - 1; i >= 0; i--) {
         const c = state.crystals[i];
         const dist = Math.sqrt((state.player.x + state.player.size/2 - c.x)**2 + (state.player.y + state.player.size/2 - c.y)**2);
         if (dist < state.player.size + 6) {
           state.player.gold += c.value;
           state.player.score += c.value * 2;
-          createParticle(c.x, c.y, c.color, 6, `+${c.value} ทอง`);
+          createParticle(c.x, c.y, c.color, 6, `+${c.value} g`);
           state.crystals.splice(i, 1);
         }
       }
@@ -458,73 +457,38 @@
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // 1. หน้าจอเมนูเริ่มเกม (Start Screen)
       if (state.screen === "START") {
-        ctx.fillStyle = "#040b1e";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
-        ctx.fillStyle = "#38bdf8";
-        ctx.font = "bold 38px 'Segoe UI', sans-serif";
-        ctx.textAlign = "center";
+        ctx.fillStyle = "#040b1e"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#38bdf8"; ctx.font = "bold 38px 'Segoe UI'"; ctx.textAlign = "center";
         ctx.fillText("💎 CRYSTAL HUNTER RPG 💎", canvas.width / 2, 220);
-        
-        ctx.fillStyle = "#91a1c7";
-        ctx.font = "16px 'Segoe UI'";
-        ctx.fillText("สะสมแต้มให้ถึง 2,500 เพื่ออัญเชิญบอสใหญ่และสยบมันเพื่อเคลียร์ภารกิจ!", canvas.width / 2, 280);
-
-        ctx.fillStyle = "#22c55e";
-        ctx.fillRect(380, 350, 200, 50);
-        ctx.fillStyle = "#fff";
-        ctx.font = "bold 18px 'Segoe UI'";
+        ctx.fillStyle = "#91a1c7"; ctx.font = "16px 'Segoe UI'";
+        ctx.fillText("ทำแต้ม 2,500 เพื่อสยบบอสใหญ่เพื่อพิชิตมิติแห่งนี้!", canvas.width / 2, 280);
+        ctx.fillStyle = "#22c55e"; ctx.fillRect(380, 350, 200, 50);
+        ctx.fillStyle = "#fff"; ctx.font = "bold 18px 'Segoe UI'";
         ctx.fillText("คลิกเพื่อเริ่มเล่นเกม", canvas.width / 2, 382);
         return;
       }
 
-      // 2. หน้าจอภารกิจสำเร็จ (Victory Screen)
       if (state.screen === "VICTORY") {
-        ctx.fillStyle = "#020617";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = "#facc15";
-        ctx.font = "bold 32px 'Segoe UI'";
-        ctx.textAlign = "center";
-        ctx.fillText("🎉 ภารกิจสำเร็จ: สยบบอสและปกป้องมิติเสร็จสิ้น! 🎉", canvas.width / 2, 200);
-        
-        ctx.fillStyle = "#f8fafc";
-        ctx.font = "16px 'Segoe UI'";
-        ctx.fillText(`คะแนนเกียรติยศสูงสุด: ${state.player.score} แต้ม  •  เลเวลสุดท้าย: Lv.${state.player.level}`, canvas.width / 2, 260);
-
-        ctx.fillStyle = "#38bdf8";
-        ctx.fillRect(380, 340, 200, 50);
-        ctx.fillStyle = "#fff";
-        ctx.font = "bold 16px 'Segoe UI'";
-        ctx.fillText("เล่นอีกครั้ง", canvas.width / 2, 370);
+        ctx.fillStyle = "#020617"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#facc15"; ctx.font = "bold 32px 'Segoe UI'"; ctx.textAlign = "center";
+        ctx.fillText("🎉 ภารกิจสำเร็จ: เคลียร์มิติสมบูรณ์! 🎉", canvas.width / 2, 200);
+        ctx.fillStyle = "#38bdf8"; ctx.fillRect(380, 340, 200, 50);
+        ctx.fillStyle = "#fff"; ctx.font = "bold 16px 'Segoe UI'"; ctx.fillText("เล่นอีกครั้ง", canvas.width / 2, 370);
         return;
       }
 
-      // 3. หน้าจอแพ้ (Game Over Screen)
       if (state.screen === "GAMEOVER") {
-        ctx.fillStyle = "#0b0202";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = "#ef4444";
-        ctx.font = "bold 36px 'Segoe UI'";
-        ctx.textAlign = "center";
-        ctx.fillText("💀 GAME OVER — ผู้ล่าถูกทำลาย 💀", canvas.width / 2, 200);
-        
-        ctx.fillStyle = "#91a1c7";
-        ctx.font = "16px 'Segoe UI'";
-        ctx.fillText(`คุณพ่ายแพ้ในมิติชั้นที่ ${state.dungeonLevel} ทำแต้มได้ ${state.player.score} คะแนน`, canvas.width / 2, 260);
-
-        ctx.fillStyle = "#475569";
-        ctx.fillRect(380, 340, 200, 50);
-        ctx.fillStyle = "#fff";
-        ctx.font = "bold 16px 'Segoe UI'";
-        ctx.fillText("ลองใหม่อีกครั้ง", canvas.width / 2, 370);
+        ctx.fillStyle = "#0b0202"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#ef4444"; ctx.font = "bold 36px 'Segoe UI'"; ctx.textAlign = "center";
+        ctx.fillText("💀 GAME OVER 💀", canvas.width / 2, 200);
+        ctx.fillStyle = "#475569"; ctx.fillRect(380, 340, 200, 50);
+        ctx.fillStyle = "#fff"; ctx.font = "bold 16px 'Segoe UI'"; ctx.fillText("ลองใหม่อีกครั้ง", canvas.width / 2, 370);
         return;
       }
 
-      // 4. หน้าจอหลักของการเล่นเกมปกติ
-      ctx.fillStyle = "#070e27";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      // เล่นเกมปกติ
+      ctx.fillStyle = "#070e27"; ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       state.crystals.forEach(c => {
         ctx.fillStyle = c.color;
@@ -536,11 +500,8 @@
       state.enemies.forEach(e => {
         ctx.fillStyle = e.isBoss ? "#a855f7" : e.isMiniBoss ? "#f43f5e" : "#ef4444";
         ctx.fillRect(e.x, e.y, e.size, e.size);
-
-        ctx.fillStyle = "rgba(0,0,0,0.6)";
-        ctx.fillRect(e.x, e.y - 8, e.size, 4);
-        ctx.fillStyle = "#ef4444";
-        ctx.fillRect(e.x, e.y - 8, (e.hp / e.maxHp) * e.size, 4);
+        ctx.fillStyle = "rgba(0,0,0,0.6)"; ctx.fillRect(e.x, e.y - 8, e.size, 4);
+        ctx.fillStyle = "#ef4444"; ctx.fillRect(e.x, e.y - 8, (e.hp / e.maxHp) * e.size, 4);
       });
 
       state.projectiles.forEach(p => {
@@ -548,34 +509,49 @@
         ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill();
       });
 
-      // วาดตัวละครผู้เล่น (Vector shape การันตีไม่หาย 100%)
-      ctx.fillStyle = "#22c55e";
-      ctx.fillRect(state.player.x, state.player.y, state.player.size, state.player.size);
-      ctx.strokeStyle = "#38bdf8"; 
-      ctx.lineWidth = 2;
-      ctx.strokeRect(state.player.x, state.player.y, state.player.size, state.player.size);
-      ctx.lineWidth = 1;
+      // ================= ยัดโมเดลตัวละครนักล่า (RENDER CHARACTER) =================
+      ctx.save();
+      const pCenterX = state.player.x + state.player.size / 2;
+      const pCenterY = state.player.y + state.player.size / 2;
+      ctx.translate(pCenterX, pCenterY);
+      ctx.rotate(state.player.angle); // หันหน้าตามมุมมองเมาส์แบบเกมระดับพรีเมียม
+
+      // ส่วนเกราะ/ลำตัว (Base Body)
+      ctx.fillStyle = "#16a34a";
+      ctx.beginPath();
+      ctx.arc(0, 0, state.player.size / 2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = "#22c55e";
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      // แขนขวา (ถือดาบ/ปืนแสง)
+      ctx.fillStyle = "#38bdf8";
+      ctx.fillRect(state.player.size / 3, -12, 10, 6);
+
+      // ส่วนใบหน้า/ดวงตาจักรกลส่องสว่าง
+      ctx.fillStyle = "#fbbf24";
+      ctx.beginPath();
+      ctx.arc(state.player.size / 4, -6, 4, 0, Math.PI * 2);
+      ctx.arc(state.player.size / 4, 6, 4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+      // =================================================================
 
       state.particles.forEach(p => {
         ctx.fillStyle = p.color;
         if (p.text) {
-          ctx.font = "bold 13px 'Segoe UI'";
-          ctx.textAlign = "left";
+          ctx.font = "bold 13px 'Segoe UI'"; ctx.textAlign = "left";
           ctx.fillText(p.text, p.x, p.y);
         } else {
           ctx.fillRect(p.x, p.y, p.size, p.size);
         }
       });
 
-      // แสดงแถบหน้าจอ GUI สเตตัสด้านซ้ายบน
-      ctx.fillStyle = "rgba(8, 15, 32, 0.85)";
-      ctx.fillRect(16, 16, 380, 85);
-      ctx.strokeStyle = "#38bdf8";
-      ctx.strokeRect(16, 16, 380, 85);
-      
-      ctx.fillStyle = "#f8fafc";
-      ctx.font = "bold 13px 'Segoe UI'";
-      ctx.textAlign = "left";
+      // HUD แถบสถานะ
+      ctx.fillStyle = "rgba(8, 15, 32, 0.85)"; ctx.fillRect(16, 16, 380, 85);
+      ctx.strokeStyle = "#38bdf8"; ctx.strokeRect(16, 16, 380, 85);
+      ctx.fillStyle = "#f8fafc"; ctx.font = "bold 13px 'Segoe UI'"; ctx.textAlign = "left";
       ctx.fillText(`ผู้ล่า Lv.${state.player.level} (มิติชั้นที่ ${state.dungeonLevel}/5)`, 28, 34);
 
       ctx.fillStyle = "#1e293b"; ctx.fillRect(28, 44, 100, 8);
@@ -591,62 +567,47 @@
       ctx.fillStyle = "#cbd5e1"; ctx.fillText(`แต้มคิล: ${state.player.score}/2500`, 140, 76);
 
       if (state.bossSpawned) {
-        ctx.fillStyle = "#facc15";
-        ctx.font = "bold 14px 'Segoe UI'";
-        ctx.fillText("⚠️ บอสใหญ่ Rift Overlord เกิดแล้ว! จงกำจัดมันเพื่อจบเกม!", 420, 36);
+        ctx.fillStyle = "#facc15"; ctx.font = "bold 14px 'Segoe UI'";
+        ctx.fillText("⚠️ บอสใหญ่ Rift Overlord เกิดแล้ว! จงกำจัดมัน!", 420, 36);
       }
 
-      // แสดงเมนูอัปเกรดร้านค้า (เมื่อเปิดอยู่)
       if (state.showUpgradeMenu) {
-        ctx.fillStyle = "rgba(2, 6, 23, 0.95)";
-        ctx.fillRect(200, 150, 560, 300);
-        ctx.strokeStyle = "#facc15";
-        ctx.strokeRect(200, 150, 560, 300);
-        
-        ctx.fillStyle = "#facc15";
-        ctx.font = "bold 16px 'Segoe UI'";
-        ctx.fillText("🛒 แผงวงจรร้านค้าอัปเกรด (กด P เพื่อเปิด/ปิด)", 230, 190);
+        ctx.fillStyle = "rgba(2, 6, 23, 0.95)"; ctx.fillRect(200, 150, 560, 300);
+        ctx.strokeStyle = "#facc15"; ctx.strokeRect(200, 150, 560, 300);
+        ctx.fillStyle = "#facc15"; ctx.font = "bold 16px 'Segoe UI'";
+        ctx.fillText("🛒 ร้านค้าอัปเกรด (กด P เพื่อเปิด/ปิด)", 230, 190);
         
         ctx.fillStyle = "rgba(30, 41, 59, 0.9)"; ctx.fillRect(230, 220, 500, 45);
         ctx.fillStyle = "#f8fafc"; ctx.font = "bold 12px 'Segoe UI'";
-        ctx.fillText("เพิ่มพลังความเสียหายพื้นฐาน (+8 ดาเมจ) — [คลิกช่องนี้เพื่อซื้อ]", 245, 238);
+        ctx.fillText("เพิ่มพลังโจมตีพื้นฐาน (+8 ดาเมจ) — [คลิกช่องนี้]", 245, 238);
         ctx.fillStyle = "#facc15"; ctx.fillText("ราคา: 80 ทอง", 245, 254);
 
         ctx.fillStyle = "rgba(30, 41, 59, 0.9)"; ctx.fillRect(230, 280, 500, 45);
         ctx.fillStyle = "#f8fafc";
-        ctx.fillText("ฟื้นฟูฉุกเฉินด่วน (+50% HP & เต็มพลังเวทมานา) — [คลิกช่องนี้เพื่อซื้อ]", 245, 298);
+        ctx.fillText("ฟื้นฟูฉุกเฉินด่วน (+50% HP & เต็มมานา) — [คลิกช่องนี้]", 245, 298);
         ctx.fillStyle = "#facc15"; ctx.fillText("ราคา: 40 ทอง", 245, 314);
       }
     }
 
-    // จัดการตรวจพิกัดและปุ่มบน Canvas
     canvas.addEventListener("mousedown", (e) => {
       const rect = canvas.getBoundingClientRect();
       const mouseX = ((e.clientX - rect.left) / rect.width) * canvas.width;
       const mouseY = ((e.clientY - rect.top) / rect.height) * canvas.height;
 
       if (state.screen === "START") {
-        if (mouseX >= 380 && mouseX <= 580 && mouseY >= 350 && mouseY <= 400) {
-          initGame();
-        }
+        if (mouseX >= 380 && mouseX <= 580 && mouseY >= 350 && mouseY <= 400) initGame();
         return;
       }
-
       if (state.screen === "VICTORY" || state.screen === "GAMEOVER") {
-        if (mouseX >= 380 && mouseX <= 580 && mouseY >= 340 && mouseY <= 390) {
-          initGame();
-        }
+        if (mouseX >= 380 && mouseX <= 580 && mouseY >= 340 && mouseY <= 390) initGame();
         return;
       }
 
-      // ซื้อของในหน้าต่างร้านค้าอัปเกรด
       if (state.screen === "PLAYING" && state.showUpgradeMenu) {
         if (mouseX >= 230 && mouseX <= 730) {
           if (mouseY >= 220 && mouseY <= 265) {
             if (state.player.gold >= 80) {
-              state.player.gold -= 80;
-              state.player.baseDamage += 8;
-              state.player.skillDamage += 16;
+              state.player.gold -= 80; state.player.baseDamage += 8; state.player.skillDamage += 16;
               createParticle(state.player.x, state.player.y, "#38bdf8", 5, "+8 Damage!");
             }
           }
@@ -665,7 +626,6 @@
       if (e.button === 0) performAttack(false);
     });
 
-    // เชื่อมปุ่มกดจำลองด้านล่างหน้าจอ (ปรับแต่งการโจมตีให้พุ่งตรงไปข้างหน้าเพื่อตัดปัญหามุมกระสุนเพี้ยน)
     document.getElementById("btn-attack").addEventListener("click", () => performAttack(true));
     document.getElementById("btn-skill").addEventListener("click", () => performSkill(true));
     document.getElementById("btn-dash").addEventListener("click", performDash);
@@ -673,14 +633,11 @@
       if (state.screen === "PLAYING") state.showUpgradeMenu = !state.showUpgradeMenu;
     });
     document.getElementById("btn-fullscreen").addEventListener("click", () => {
-      if (!document.fullscreenElement) {
-        canvas.requestFullscreen().catch(err => console.log(err));
-      } else {
-        document.exitFullscreen();
-      }
+      if (!document.fullscreenElement) canvas.requestFullscreen().catch(err => console.log(err));
+      else document.exitFullscreen();
     });
 
-    // ตรวจสอบสัญญาณคีย์บอร์ดปุ่มกดระบบเคลื่อนที่แบบปกติ (เสถียร 100%)
+    // แก้บั๊กปุ่มค้าง: ผูก Event ตรวจสอบสถานะการกดและปล่อยปุ่มอย่างเที่ยงตรง
     document.addEventListener("keydown", (e) => {
       const key = e.key.toLowerCase();
       keyState[key] = true;
@@ -702,7 +659,6 @@
     });
     canvas.addEventListener("contextmenu", (e) => { e.preventDefault(); performSkill(false); });
 
-    // รันลูปของเกมหลักอย่างต่อเนื่อง
     function gameLoop() {
       update();
       draw();
