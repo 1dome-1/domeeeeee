@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Crystal Hunter RPG — Vercel Stable Edition</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="game-shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Crystal Hunter • Vercel Production Build</p>
+        <h1>Crystal Hunter: The Final Shard</h1>
+      </div>
+      <div class="status-pill">v2.1 Stable Ready</div>
+    </header>
+
+    <canvas id="game" width="960" height="600"></canvas>
+    
+    <div class="hint">
+      <strong>[วิธีควบคุม]:</strong> WASD / ปุ่มลูกศร = เคลื่อนที่ • Spacebar = ยิงกระสุนแสง • P = เมนูอัปเกรดสเตตัส & ฮีล • B = ร้านค้าสกินมิติ • 7, 8, 9, 0 = คีย์ลัดเปลี่ยนสีสกิน
+    </div>
+
+    <section class="vibe-panel" aria-label="Game Lore">
+      <h2>Dimensional Lore: The Final Gate</h2>
+      <div class="vibe-grid">
+        <article style="grid-column: span 3;">
+          <h3>ภารกิจหลุดพ้นมิติเงามืด</h3>
+          <p>
+            คุณต้องสะสมคะแนนจากการกำจัดศัตรูและเก็บผลึก Shards เพื่อเรียก <strong>"Rift Overlord" (บอสใหญ่)</strong> ออกมา 
+            เมื่อคุณทำลายบอสใหญ่ในมิติที่ 5 ได้ ประตูมิติจุดจบจะเปิดออกเพื่อนำคุณกลับสู่โลกแห่งความจริงและสิ้นสุดการเดินทางครั้งนี้อย่างเป็นทางการ!
+          </p>
+        </article>
+      </div>
+    </section>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
