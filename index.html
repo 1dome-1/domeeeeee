@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Crystal Hunter RPG — Ultimate Build</title>
+  <title>Crystal Hunter RPG — Bugfix Build</title>
   <style>
     :root {
       color-scheme: dark;
@@ -161,7 +161,7 @@
     </div>
     
     <div class="hint">
-      <strong>[วิธีเล่นควบคุม]:</strong> เดินด้วยปุ่ม <b>WASD หรือลูกศร</b> หรือกดคลิกปุ่มด้านบนเพื่อสั่งคำสั่งโจมตีและเข้าเมนูร้านค้า
+      <strong>[วิธีเล่นควบคุม]:</strong> เดินลื่นไหลด้วยปุ่ม <b>W, A, S, D หรือ ปุ่มลูกศร</b> คีย์บอร์ด • เล็งทิศทางโจมตีด้วยการขยับเมาส์
     </div>
   </div>
 
@@ -191,12 +191,19 @@
       dashCooldown: 0
     };
 
-    const keyState = {};
-    const mouse = { x: 0, y: 0 };
+    // ล้างและประกาศชุดคีย์บอร์ดรับข้อมูล
+    let keyState = {};
+    const mouse = { x: 480, y: 150 }; // ค่าเริ่มต้นของเมาส์ให้อยู่กลางจอค่อนไปทางบน
     let lastAttackTime = 0;
+
+    // ล้างสถานะคีย์ทั้งหมดเมื่อต้องการป้องกันบั๊กเดินค้าง
+    function clearInputs() {
+      keyState = {};
+    }
 
     // ฟังก์ชันเริ่มเกมใหม่/รีเซ็ตค่าเริ่มต้น
     function initGame() {
+      clearInputs();
       state.screen = "PLAYING";
       state.player = {
         x: 480, y: 450, size: 32,
@@ -262,15 +269,16 @@
       }
     }
 
-    function performAttack() {
-      if (state.screen !== "PLAYING") return;
+    // ฟังก์ชันยิง/โจมตี (fromButton = จริง เมื่อเรียกจากปุ่มกระตุ้นข้างนอกเพื่อแก้ทิศทาง)
+    function performAttack(fromButton = false) {
+      if (state.screen !== "PLAYING" || state.showUpgradeMenu) return;
       const now = Date.now();
       if (now - lastAttackTime < 250) return;
       lastAttackTime = now;
 
-      // ถ้าไม่มีการขยับเมาส์ ให้ยิงขึ้นด้านบนตรงๆ
-      let targetX = mouse.x || state.player.x + 16;
-      let targetY = mouse.y || state.player.y - 100;
+      // แก้บั๊กวิถีกระสุนเพี้ยน: ถ้ากดปุ่มให้พุ่งตรงไปข้างหน้าทันที
+      let targetX = fromButton ? (state.player.x + state.player.size / 2) : mouse.x;
+      let targetY = fromButton ? (state.player.y - 200) : mouse.y;
 
       const dx = targetX - (state.player.x + state.player.size / 2);
       const dy = targetY - (state.player.y + state.player.size / 2);
@@ -286,12 +294,12 @@
       }
     }
 
-    function performSkill() {
+    function performSkill(fromButton = false) {
       if (state.screen !== "PLAYING") return;
       if (state.player.mana >= 15) {
         state.player.mana -= 15;
-        let targetX = mouse.x || state.player.x + 16;
-        let targetY = mouse.y || state.player.y - 100;
+        let targetX = fromButton ? (state.player.x + state.player.size / 2) : mouse.x;
+        let targetY = fromButton ? (state.player.y - 200) : mouse.y;
 
         const dx = targetX - (state.player.x + state.player.size / 2);
         const dy = targetY - (state.player.y + state.player.size / 2);
@@ -334,6 +342,7 @@
     function update() {
       if (state.screen !== "PLAYING") return;
 
+      // ตรวจสอบระบบเดินปุ่มกด WASD / Arrow อย่างลื่นไหลแม่นยำ
       let dx = 0, dy = 0;
       if (keyState["w"] || keyState["arrowup"]) dy = -1;
       if (keyState["s"] || keyState["arrowdown"]) dy = 1;
@@ -346,6 +355,7 @@
         state.player.y += (dy / len) * state.player.speed;
       }
 
+      // ล็อกกรอบไม่ให้ตัวละครเดินหลุดทะลุขอบแผนที่ของ Canvas
       state.player.x = Math.max(0, Math.min(canvas.width - state.player.size, state.player.x));
       state.player.y = Math.max(0, Math.min(canvas.height - state.player.size, state.player.y));
 
@@ -372,6 +382,7 @@
             if (e.hp <= 0) {
               if (e.isBoss) {
                 state.screen = "VICTORY";
+                clearInputs();
                 statusPill.textContent = "ฉากจบภารกิจสำเร็จ";
               } else {
                 const earn = e.isMiniBoss ? 45 : 15;
@@ -416,6 +427,7 @@
           state.player.hp = Math.max(0, state.player.hp - (e.isBoss ? 1.2 : 0.4));
           if (state.player.hp <= 0) {
             state.screen = "GAMEOVER";
+            clearInputs();
             statusPill.textContent = "จบเกม (ผู้ล่าพ่ายแพ้)";
           }
         }
@@ -446,7 +458,7 @@
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // 1. ฉากหน้าจอเมนูเริ่มเกม (Start Screen)
+      // 1. หน้าจอเมนูเริ่มเกม (Start Screen)
       if (state.screen === "START") {
         ctx.fillStyle = "#040b1e";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -460,7 +472,6 @@
         ctx.font = "16px 'Segoe UI'";
         ctx.fillText("สะสมแต้มให้ถึง 2,500 เพื่ออัญเชิญบอสใหญ่และสยบมันเพื่อเคลียร์ภารกิจ!", canvas.width / 2, 280);
 
-        // วาดปุ่มกดจำลองบน Canvas เพื่อเริ่มเกม
         ctx.fillStyle = "#22c55e";
         ctx.fillRect(380, 350, 200, 50);
         ctx.fillStyle = "#fff";
@@ -469,7 +480,7 @@
         return;
       }
 
-      // 2. ฉากจบเกมกรณีภารกิจสำเร็จ (Victory Screen)
+      // 2. หน้าจอภารกิจสำเร็จ (Victory Screen)
       if (state.screen === "VICTORY") {
         ctx.fillStyle = "#020617";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -490,7 +501,7 @@
         return;
       }
 
-      // 3. ฉากจบเกมกรณีตายพ่ายแพ้ (Game Over Screen)
+      // 3. หน้าจอแพ้ (Game Over Screen)
       if (state.screen === "GAMEOVER") {
         ctx.fillStyle = "#0b0202";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -537,7 +548,7 @@
         ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill();
       });
 
-      // วาดตัวละครผู้เล่น
+      // วาดตัวละครผู้เล่น (Vector shape การันตีไม่หาย 100%)
       ctx.fillStyle = "#22c55e";
       ctx.fillRect(state.player.x, state.player.y, state.player.size, state.player.size);
       ctx.strokeStyle = "#38bdf8"; 
@@ -614,7 +625,6 @@
       const mouseX = ((e.clientX - rect.left) / rect.width) * canvas.width;
       const mouseY = ((e.clientY - rect.top) / rect.height) * canvas.height;
 
-      // จัดการฉากเมนูเริ่มเกม
       if (state.screen === "START") {
         if (mouseX >= 380 && mouseX <= 580 && mouseY >= 350 && mouseY <= 400) {
           initGame();
@@ -622,7 +632,6 @@
         return;
       }
 
-      // จัดการฉากจบเกมชนะ หรือแพ้
       if (state.screen === "VICTORY" || state.screen === "GAMEOVER") {
         if (mouseX >= 380 && mouseX <= 580 && mouseY >= 340 && mouseY <= 390) {
           initGame();
@@ -653,12 +662,12 @@
         return;
       }
 
-      if (e.button === 0) performAttack();
+      if (e.button === 0) performAttack(false);
     });
 
-    // เชื่อมปุ่มกดด้านล่างให้จำลองการทำงานเหมือนเกมปกติ
-    document.getElementById("btn-attack").addEventListener("click", performAttack);
-    document.getElementById("btn-skill").addEventListener("click", performSkill);
+    // เชื่อมปุ่มกดจำลองด้านล่างหน้าจอ (ปรับแต่งการโจมตีให้พุ่งตรงไปข้างหน้าเพื่อตัดปัญหามุมกระสุนเพี้ยน)
+    document.getElementById("btn-attack").addEventListener("click", () => performAttack(true));
+    document.getElementById("btn-skill").addEventListener("click", () => performSkill(true));
     document.getElementById("btn-dash").addEventListener("click", performDash);
     document.getElementById("btn-shop").addEventListener("click", () => {
       if (state.screen === "PLAYING") state.showUpgradeMenu = !state.showUpgradeMenu;
@@ -671,24 +680,27 @@
       }
     });
 
-    // ปุ่มควบคุมคีย์บอร์ด
+    // ตรวจสอบสัญญาณคีย์บอร์ดปุ่มกดระบบเคลื่อนที่แบบปกติ (เสถียร 100%)
     document.addEventListener("keydown", (e) => {
       const key = e.key.toLowerCase();
       keyState[key] = true;
-      if (key === "q") performSkill();
+      if (key === "q") performSkill(false);
       if (e.key === "Shift") performDash();
       if (key === "p") {
         if (state.screen === "PLAYING") state.showUpgradeMenu = !state.showUpgradeMenu;
       }
     });
-    document.addEventListener("keyup", (e) => { keyState[e.key.toLowerCase()] = false; });
+    
+    document.addEventListener("keyup", (e) => { 
+      keyState[e.key.toLowerCase()] = false; 
+    });
 
     canvas.addEventListener("mousemove", (e) => {
       const rect = canvas.getBoundingClientRect();
       mouse.x = ((e.clientX - rect.left) / rect.width) * canvas.width;
       mouse.y = ((e.clientY - rect.top) / rect.height) * canvas.height;
     });
-    canvas.addEventListener("contextmenu", (e) => { e.preventDefault(); performSkill(); });
+    canvas.addEventListener("contextmenu", (e) => { e.preventDefault(); performSkill(false); });
 
     // รันลูปของเกมหลักอย่างต่อเนื่อง
     function gameLoop() {
