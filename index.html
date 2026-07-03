@@ -1,49 +1,575 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Crystal Hunter RPG — Ultimate Stable Edition</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>Crystal Hunter RPG — Ultimate Stable</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #040816;
+      --panel: rgba(8, 15, 32, 0.9);
+      --line: #38bdf8;
+      --text: #f4f7ff;
+      --muted: #91a1c7;
+      --gold: #facc15;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--text);
+      background: radial-gradient(circle at top, #0f172a, var(--bg) 85%);
+      display: grid;
+      place-items: center;
+      padding: 16px;
+      overflow: auto;
+    }
+
+    .game-shell {
+      width: min(100vw, 1000px);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      border-radius: 20px;
+      background: rgba(3, 10, 24, 0.8);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .topbar h1 {
+      margin: 0;
+      font-size: 1.3rem;
+    }
+
+    .eyebrow {
+      margin: 0 0 2px;
+      color: var(--gold);
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .status-pill {
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: rgba(56, 189, 248, 0.1);
+      color: var(--line);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    canvas {
+      width: 100%;
+      height: auto;
+      border: 2px solid var(--line);
+      background: #020617;
+      border-radius: 12px;
+      display: block;
+    }
+
+    .fullscreen-control {
+      text-align: center;
+    }
+
+    #btn-fullscreen {
+      padding: 10px 24px;
+      background: var(--line);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.1s ease;
+      box-shadow: 0 4px 12px rgba(56, 189, 248, 0.2);
+    }
+
+    #btn-fullscreen:hover { background: #0284c7; }
+    #btn-fullscreen:active { transform: scale(0.98); }
+
+    .hint {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--muted);
+      background: rgba(30, 41, 59, 0.5);
+      padding: 10px;
+      border-radius: 8px;
+    }
+  </style>
 </head>
 <body>
+
   <div class="game-shell">
     <header class="topbar">
-      <div class="logo-area">
-        <img src="https://res.cloudinary.com/dsucg33fv/image/upload/v1782709347/logo_i8827v.png" alt="Crystal Hunter Logo" class="game-logo" onerror="this.style.display='none'" />
-        <div>
-          <p class="eyebrow">MDA Framework Integrated Build</p>
-          <h1>Crystal Hunter: The Final Gate</h1>
-        </div>
+      <div>
+        <p class="eyebrow">Fixed Engine Build</p>
+        <h1>Crystal Hunter RPG</h1>
       </div>
-      <div class="status-pill">v3.0 Stable Production</div>
+      <div class="status-pill">UI & Character Fixed</div>
     </header>
 
     <canvas id="game" width="960" height="600"></canvas>
     
-    <div class="hint">
-      <strong>[วิธีควบคุม]:</strong> WASD / ปุ่มลูกศร = เคลื่อนที่ • คลิกซ้าย = โจมตีปกติ • Q / คลิกขวา = ใช้สกิล • Shift = แดชความเร็วสูง • P = เปิด/ปิดหน้าต่างสถานะ & ฮีลระบบ • B = เปิด/ปิดหน้าต่างร้านค้าสกินแบบกริด
+    <div class="fullscreen-control">
+      <button id="btn-fullscreen">🖥️ เล่นแบบเต็มจอ (Toggle Fullscreen)</button>
     </div>
-
-    <section class="vibe-panel" aria-label="Game Design Note">
-      <h2>Game Design Analysis (MDA Framework)</h2>
-      <div class="vibe-grid">
-        <article>
-          <h3>Challenge (ความท้าทาย)</h3>
-          <p>เข้าใจง่ายแต่เล่นยาก ศัตรูธรรมดาและบอสใหญ่จะทวีความโหดขึ้นตามชั้นมิติ ต้องอาศัยจังหวะการแดชหลบและการบริหารจัดการ Stamina</p>
-        </article>
-        <article>
-          <h3>Exploration & Reward</h3>
-          <p>สะสมผลึก Shards เพื่อเพิ่มพลังและทองคำ สุ่มรับโบนัสทองคำเพิ่ม 5-15 ทองเมื่อกำจัดศัตรูสำเร็จ มอบรางวัลที่คุ้มค่าทุกการกระทำ</p>
-        </article>
-        <article>
-          <h3>Expression (การแสดงออก)</h3>
-          <p>ระบบร้านค้าสกินมิติ (Chroma Shop) กดปุ่ม B เพื่อเปิดอินเตอร์เฟสกริดที่จัดระเบียบเรียบร้อย สื่อสารข้อมูลชัดเจนด้วย UI/UX ที่สะอาดตา</p>
-        </article>
-      </div>
-    </section>
+    
+    <div class="hint">
+      <strong>[วิธีควบคุม]:</strong> WASD / ปุ่มลูกศร = เคลื่อนที่ • คลิกซ้าย = โจมตีปกติ • Q / คลิกขวา = ใช้สกิล • Shift = แดช • P = เปิด/ปิดหน้าต่างสถานะ & ร้านค้าอัปเกรด
+    </div>
   </div>
 
-  <script src="game.js"></script>
+  <script>
+    const canvas = document.getElementById("game");
+    const ctx = canvas.getContext("2d");
+    const fullscreenBtn = document.getElementById("btn-fullscreen");
+
+    // โครงสร้างข้อมูลสถานะเกมหลัก (ดึงระบบเก่ากลับมาให้ทำงานร่วมกันได้)
+    let state = {
+      player: {
+        x: 480, y: 450, size: 32,
+        hp: 100, maxHp: 100,
+        mana: 60, maxMana: 60,
+        stamina: 100, maxStamina: 100,
+        gold: 150, score: 0, speed: 5, level: 1, exp: 0, nextLevelExp: 100,
+        baseDamage: 20, skillDamage: 50
+      },
+      projectiles: [],
+      enemies: [],
+      particles: [],
+      crystals: [],
+      dungeonLevel: 1,
+      bossSpawned: false,
+      gameCompleted: false, 
+      showUpgradeMenu: false, // หน้าจอเมนูหลัก P
+      dashCooldown: 0
+    };
+
+    const keyState = {};
+    const mouse = { x: 0, y: 0 };
+    let lastAttackTime = 0;
+
+    // ระบบสุ่มสร้างมอนสเตอร์
+    function spawnEnemy() {
+      if (state.player.score >= 2000 && !state.bossSpawned) {
+        state.bossSpawned = true;
+        return { x: 440, y: 100, size: 70, hp: 1000, maxHp: 1000, isBoss: true, speed: 1.5, color: "#a855f7" };
+      }
+      const isMini = Math.random() < 0.2;
+      return {
+        x: Math.random() * (canvas.width - 40),
+        y: Math.random() * 200 + 50,
+        size: isMini ? 44 : 28,
+        hp: isMini ? 150 : 40,
+        maxHp: isMini ? 150 : 40,
+        isBoss: false,
+        isMiniBoss: isMini,
+        speed: isMini ? 1.8 : 2.2 + Math.random()
+      };
+    }
+
+    function spawnCrystal() {
+      const r = Math.random();
+      return {
+        x: Math.random() * (canvas.width - 30) + 15,
+        y: Math.random() * (canvas.height - 250) + 150,
+        size: 12,
+        color: r > 0.85 ? "#facc15" : "#38bdf8",
+        value: r > 0.85 ? 50 : 15,
+        pulse: Math.random() * Math.PI
+      };
+    }
+
+    function createParticle(x, y, color, count = 5, text = "") {
+      if (text) {
+        state.particles.push({ x, y, vx: 0, vy: -1.2, life: 40, color, text });
+        return;
+      }
+      for (let i = 0; i < count; i++) {
+        state.particles.push({
+          x, y, vx: (Math.random() - 0.5) * 4, vy: (Math.random() - 0.5) * 4,
+          size: Math.random() * 3 + 2, life: 20, color, text: ""
+        });
+      }
+    }
+
+    // ฟังก์ชันการโจมตี
+    function performAttack() {
+      const now = Date.now();
+      if (now - lastAttackTime < 250) return;
+      lastAttackTime = now;
+
+      const dx = mouse.x - (state.player.x + state.player.size / 2);
+      const dy = mouse.y - (state.player.y + state.player.size / 2);
+      const len = Math.sqrt(dx * dx + dy * dy);
+      
+      if (len > 0) {
+        state.projectiles.push({
+          x: state.player.x + state.player.size / 2,
+          y: state.player.y + state.player.size / 2,
+          vx: (dx / len) * 11, vy: (dy / len) * 11,
+          size: 5, damage: state.player.baseDamage, isSkill: false
+        });
+      }
+    }
+
+    function performSkill() {
+      if (state.player.mana >= 15) {
+        state.player.mana -= 15;
+        const dx = mouse.x - (state.player.x + state.player.size / 2);
+        const dy = mouse.y - (state.player.y + state.player.size / 2);
+        const len = Math.sqrt(dx * dx + dy * dy);
+        
+        if (len > 0) {
+          state.projectiles.push({
+            x: state.player.x + state.player.size / 2,
+            y: state.player.y + state.player.size / 2,
+            vx: (dx / len) * 14, vy: (dy / len) * 14,
+            size: 10, damage: state.player.skillDamage, isSkill: true
+          });
+          createParticle(state.player.x, state.player.y, "#a855f7", 8, "⚡ SKILL SHOT");
+        }
+      }
+    }
+
+    function performDash() {
+      if (state.player.stamina >= 30 && state.dashCooldown <= 0) {
+        state.player.stamina -= 30;
+        state.dashCooldown = 20;
+        let dx = 0, dy = 0;
+        if (keyState["w"] || keyState["arrowup"]) dy = -1;
+        if (keyState["s"] || keyState["arrowdown"]) dy = 1;
+        if (keyState["a"] || keyState["arrowleft"]) dx = -1;
+        if (keyState["d"] || keyState["arrowright"]) dx = 1;
+
+        const moveLen = Math.sqrt(dx*dx + dy*dy);
+        if (moveLen > 0) {
+          state.player.x += (dx / moveLen) * 50;
+          state.player.y += (dy / moveLen) * 50;
+        } else {
+          state.player.y -= 50;
+        }
+        createParticle(state.player.x, state.player.y, "#e2e8f0", 10, "💨 DASH!");
+      }
+    }
+
+    // ลอจิกการคำนวณเบื้องหลัง
+    function update() {
+      if (state.gameCompleted) return;
+
+      // การเคลื่อนที่ของผู้เล่น
+      let dx = 0, dy = 0;
+      if (keyState["w"] || keyState["arrowup"]) dy = -1;
+      if (keyState["s"] || keyState["arrowdown"]) dy = 1;
+      if (keyState["a"] || keyState["arrowleft"]) dx = -1;
+      if (keyState["d"] || keyState["arrowright"]) dx = 1;
+
+      if (dx !== 0 || dy !== 0) {
+        const len = Math.sqrt(dx*dx + dy*dy);
+        state.player.x += (dx / len) * state.player.speed;
+        state.player.y += (dy / len) * state.player.speed;
+      }
+
+      state.player.x = Math.max(0, Math.min(canvas.width - state.player.size, state.player.x));
+      state.player.y = Math.max(0, Math.min(canvas.height - state.player.size, state.player.y));
+
+      if (state.player.mana < state.player.maxMana) state.player.mana += 0.1;
+      if (state.player.stamina < state.player.maxStamina) state.player.stamina += 0.3;
+      if (state.dashCooldown > 0) state.dashCooldown--;
+
+      // ประมวลผลกระสุน
+      for (let i = state.projectiles.length - 1; i >= 0; i--) {
+        const p = state.projectiles[i];
+        p.x += p.vx; p.y += p.vy;
+        
+        if (p.x < 0 || p.x > canvas.width || p.y < 0 || p.y > canvas.height) {
+          state.projectiles.splice(i, 1);
+          continue;
+        }
+
+        for (let j = state.enemies.length - 1; j >= 0; j--) {
+          const e = state.enemies[j];
+          if (p.x > e.x && p.x < e.x + e.size && p.y > e.y && p.y < e.y + e.size) {
+            e.hp -= p.damage;
+            createParticle(p.x, p.y, p.isSkill ? "#a855f7" : "#38bdf8", 4, `-${p.damage}`);
+            state.projectiles.splice(i, 1);
+
+            if (e.hp <= 0) {
+              if (e.isBoss) {
+                state.gameCompleted = true;
+              } else {
+                const earn = e.isMiniBoss ? 40 : 15;
+                state.player.gold += earn;
+                state.player.score += earn * 5;
+                state.player.exp += earn;
+                createParticle(e.x, e.y, "#facc15", 6, `+${earn} Gold`);
+                
+                // ระบบเลเวลอัป
+                if (state.player.exp >= state.player.nextLevelExp) {
+                  state.player.level++;
+                  state.player.exp -= state.player.nextLevelExp;
+                  state.player.maxHp += 15;
+                  state.player.hp = state.player.maxHp;
+                  state.player.baseDamage += 4;
+                  state.player.skillDamage += 10;
+                  state.dungeonLevel = Math.min(5, state.dungeonLevel + 1);
+                  createParticle(state.player.x, state.player.y, "#34d399", 15, "🎉 LEVEL UP!");
+                }
+              }
+              state.enemies.splice(j, 1);
+            }
+            break;
+          }
+        }
+      }
+
+      // มอนสเตอร์ไล่ตามผู้เล่น
+      state.enemies.forEach(e => {
+        const px = state.player.x + state.player.size/2;
+        const py = state.player.y + state.player.size/2;
+        const ex = e.x + e.size/2;
+        const ey = e.y + e.size/2;
+        const dist = Math.sqrt((px - ex)**2 + (py - ey)**2);
+
+        if (dist > 0) {
+          e.x += ((px - ex) / dist) * e.speed;
+          e.y += ((py - ey) / dist) * e.speed;
+        }
+
+        // ชนผู้เล่น
+        if (state.player.x < e.x + e.size && state.player.x + state.player.size > e.x &&
+            state.player.y < e.y + e.size && state.player.y + state.player.size > e.y) {
+          state.player.hp = Math.max(0, state.player.hp - (e.isBoss ? 1.5 : 0.4));
+          if (state.player.hp <= 0) {
+            state.player.hp = Math.floor(state.player.maxHp * 0.5);
+            state.player.gold = Math.floor(state.player.gold * 0.85);
+            state.player.x = 480; state.player.y = 450;
+            createParticle(state.player.x, state.player.y, "#ef4444", 0, "⚠️ วาร์ปฉุกเฉินกลับจุดเซฟ!");
+          }
+        }
+      });
+
+      // เก็บผลึกคริสตัล
+      for (let i = state.crystals.length - 1; i >= 0; i--) {
+        const c = state.crystals[i];
+        const dist = Math.sqrt((state.player.x + state.player.size/2 - c.x)**2 + (state.player.y + state.player.size/2 - c.y)**2);
+        if (dist < state.player.size + 5) {
+          state.player.gold += c.value;
+          state.player.score += c.value * 2;
+          createParticle(c.x, c.y, c.color, 6, `+${c.value} ทองผลึก`);
+          state.crystals.splice(i, 1);
+        }
+      }
+
+      // อัปเดตอนุภาคเอฟเฟกต์
+      for (let i = state.particles.length - 1; i >= 0; i--) {
+        const p = state.particles[i];
+        p.x += p.vx; p.y += p.vy; p.life--;
+        if (p.life <= 0) state.particles.splice(i, 1);
+      }
+
+      if (state.enemies.length < 3 + state.dungeonLevel && !state.gameCompleted) state.enemies.push(spawnEnemy());
+      if (state.crystals.length < 4) state.crystals.push(spawnCrystal());
+    }
+
+    // วาดภาพเรนเดอร์ทั้งหมดลงบน Canvas (แก้ไขให้วาดแบบ Vector เพื่อกันตัวละครหาย)
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // วาดพื้นหลังแมพ
+      ctx.fillStyle = "#070e27";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // วาดคริสตัลตามแมพ
+      state.crystals.forEach(c => {
+        ctx.save();
+        ctx.translate(c.x, c.y);
+        ctx.fillStyle = c.color;
+        ctx.beginPath();
+        ctx.moveTo(0, -c.size); ctx.lineTo(c.size, 0); ctx.lineTo(0, c.size); ctx.lineTo(-c.size, 0);
+        ctx.closePath(); ctx.fill();
+        ctx.restore();
+      });
+
+      // วาดตัวมอนสเตอร์ศัตรู
+      state.enemies.forEach(e => {
+        ctx.fillStyle = e.isBoss ? "#a855f7" : e.isMiniBoss ? "#f43f5e" : "#ef4444";
+        ctx.fillRect(e.x, e.y, e.size, e.size);
+
+        // หลอดเลือดมอนสเตอร์
+        ctx.fillStyle = "rgba(0,0,0,0.6)";
+        ctx.fillRect(e.x, e.y - 8, e.size, 4);
+        ctx.fillStyle = "#ef4444";
+        ctx.fillRect(e.x, e.y - 8, (e.hp / e.maxHp) * e.size, 4);
+      });
+
+      // วาดกระสุนพลังงาน
+      state.projectiles.forEach(p => {
+        ctx.fillStyle = p.isSkill ? "#c084fc" : "#67e8f9";
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill();
+      });
+
+      // ⭐ วาดตัวละครผู้เล่น (วาดใหม่เป็นรูปทรงแบบมีขอบออร่า ป้องกันปัญหารูปโหลดไม่ขึ้น)
+      ctx.fillStyle = "#22c55e"; // ตัวละครหลักสีเขียวสดใสเด่นชัดเจน
+      ctx.fillRect(state.player.x, state.player.y, state.player.size, state.player.size);
+      ctx.strokeStyle = "#38bdf8"; 
+      ctx.lineWidth = 2;
+      ctx.strokeRect(state.player.x, state.player.y, state.player.size, state.player.size);
+      ctx.lineWidth = 1;
+
+      // วาดเอฟเฟกต์ตัวเลขแดเมจ/ข้อความลอย
+      state.particles.forEach(p => {
+        ctx.fillStyle = p.color;
+        if (p.text) {
+          ctx.font = "bold 13px 'Segoe UI'";
+          ctx.fillText(p.text, p.x, p.y);
+        } else {
+          ctx.fillRect(p.x, p.y, p.size, p.size);
+        }
+      });
+
+      // ⭐ แสดงผลหน้าจอ GUI หลักด้านซ้ายบน (หลอดเลือด/มานา/ทองคำ)
+      ctx.fillStyle = "rgba(8, 15, 32, 0.85)";
+      ctx.fillRect(16, 16, 380, 85);
+      ctx.strokeStyle = "#38bdf8";
+      ctx.strokeRect(16, 16, 380, 85);
+      
+      ctx.fillStyle = "#f8fafc";
+      ctx.font = "bold 13px 'Segoe UI'";
+      ctx.fillText(`ผู้เล่น Level: ${state.player.level} (มิติชั้นที่ ${state.dungeonLevel}/5)`, 28, 34);
+
+      // หลอดสถานะต่างๆ
+      ctx.fillStyle = "#1e293b"; ctx.fillRect(28, 44, 100, 8);
+      ctx.fillStyle = "#ef4444"; ctx.fillRect(28, 44, (state.player.hp / state.player.maxHp) * 100, 8); // HP
+
+      ctx.fillStyle = "#1e293b"; ctx.fillRect(140, 44, 100, 8);
+      ctx.fillStyle = "#06b6d4"; ctx.fillRect(140, 44, (state.player.mana / state.player.maxMana) * 100, 8); // Mana
+
+      ctx.fillStyle = "#1e293b"; ctx.fillRect(252, 44, 100, 8);
+      ctx.fillStyle = "#fbbf24"; ctx.fillRect(252, 44, (state.player.stamina / state.player.maxStamina) * 100, 8); // Stamina
+
+      ctx.fillStyle = "#fbbf24"; ctx.fillText(`ทอง: ${state.player.gold} g`, 28, 76);
+      ctx.fillStyle = "#cbd5e1"; ctx.fillText(`แต้มคิล: ${state.player.score}`, 140, 76);
+
+      // ⭐ แสดงเมนูร้านค้าและอัปเกรด (เมื่อกดปุ่ม P)
+      if (state.showUpgradeMenu) {
+        ctx.fillStyle = "rgba(2, 6, 23, 0.95)";
+        ctx.fillRect(200, 150, 560, 300);
+        ctx.strokeStyle = "#facc15";
+        ctx.strokeRect(200, 150, 560, 300);
+        
+        ctx.fillStyle = "#facc15";
+        ctx.font = "bold 16px 'Segoe UI'";
+        ctx.fillText("🛒 ร้านค้าพลังงานและระบบอัปเกรด (กดปุ่ม 'P' เพื่อเปิด/ปิด)", 230, 190);
+        
+        // รายการสินค้าชิ้นที่ 1
+        ctx.fillStyle = "rgba(30, 41, 59, 0.9)"; ctx.fillRect(230, 220, 500, 45);
+        ctx.fillStyle = "#f8fafc"; ctx.font = "bold 12px 'Segoe UI'";
+        ctx.fillText("อัปเกรดพลังโจมตี (+8 ดาเมจพื้นฐาน) — [คลิกซื้อที่ช่องนี้]", 245, 238);
+        ctx.fillStyle = "#facc15"; ctx.fillText("ราคา: 80 ทอง", 245, 254);
+
+        // รายการสินค้าชิ้นที่ 2
+        ctx.fillStyle = "rgba(30, 41, 59, 0.9)"; ctx.fillRect(230, 280, 500, 45);
+        ctx.fillStyle = "#f8fafc";
+        ctx.fillText("ฟื้นฟูพลังงานทันที (ฮีลแรง +50% HP และมานา) — [คลิกซื้อที่ช่องนี้]", 245, 298);
+        ctx.fillStyle = "#facc15"; ctx.fillText("ราคา: 40 ทอง", 245, 314);
+      }
+
+      // ฉากจบเกมเมื่อโค่นบอสได้
+      if (state.gameCompleted) {
+        ctx.fillStyle = "rgba(2, 6, 23, 0.9)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#facc15";
+        ctx.font = "bold 28px 'Segoe UI'";
+        ctx.textAlign = "center";
+        ctx.fillText("🎉 ภารกิจสำเร็จ: สยบบอสและผ่านด่านอย่างสมบูรณ์! 🎉", canvas.width/2, 260);
+        ctx.fillStyle = "#fff";
+        ctx.font = "16px 'Segoe UI'";
+        ctx.fillText(`คะแนนรวมของคุณคือ: ${state.player.score} แต้ม`, canvas.width/2, 310);
+      }
+    }
+
+    // ฟังก์ชันประมวลผลการคลิกซื้อของในเมนูอัปเกรด UI
+    canvas.addEventListener("mousedown", (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = ((e.clientX - rect.left) / rect.width) * canvas.width;
+      const mouseY = ((e.clientY - rect.top) / rect.height) * canvas.height;
+
+      if (state.showUpgradeMenu) {
+        if (mouseX >= 230 && mouseX <= 730) {
+          // ซื้อพลังโจมตี
+          if (mouseY >= 220 && mouseY <= 265) {
+            if (state.player.gold >= 80) {
+              state.player.gold -= 80;
+              state.player.baseDamage += 8;
+              state.player.skillDamage += 15;
+              createParticle(state.player.x, state.player.y, "#38bdf8", 5, "+8 Damage Up!");
+            }
+          }
+          // ซื้อฮีลฟื้นพลัง
+          if (mouseY >= 280 && mouseY <= 325) {
+            if (state.player.gold >= 40) {
+              state.player.gold -= 40;
+              state.player.hp = Math.min(state.player.maxHp, state.player.hp + state.player.maxHp * 0.5);
+              state.player.mana = state.player.maxMana;
+              createParticle(state.player.x, state.player.y, "#34d399", 5, "❤️ Healed!");
+            }
+          }
+        }
+        return;
+      }
+      if (e.button === 0) performAttack();
+    });
+
+    // คีย์บอร์ดและเมาส์ควบคุม
+    document.addEventListener("keydown", (e) => {
+      const key = e.key.toLowerCase();
+      keyState[key] = true;
+      if (key === "q") performSkill();
+      if (e.key === "Shift") performDash();
+      if (key === "p") state.showUpgradeMenu = !state.showUpgradeMenu; // สลับเปิดปิดเมนูสเตตัส
+    });
+
+    document.addEventListener("keyup", (e) => { keyState[e.key.toLowerCase()] = false; });
+
+    canvas.addEventListener("mousemove", (e) => {
+      const rect = canvas.getBoundingClientRect();
+      mouse.x = ((e.clientX - rect.left) / rect.width) * canvas.width;
+      mouse.y = ((e.clientY - rect.top) / rect.height) * canvas.height;
+    });
+
+    canvas.addEventListener("contextmenu", (e) => { e.preventDefault(); performSkill(); });
+
+    // 🖥️ ระบบ Fullscreen API รองรับการขยายหน้าจอเต็มพิกัดและปรับสัดส่วนอัตโนมัติ
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        canvas.requestFullscreen().catch(err => {
+          console.error(`ไม่สามารถเปิดโหมดเต็มจอได้: ${err.message}`);
+        });
+      } else {
+        document.exitFullscreen();
+      }
+    }
+    fullscreenBtn.addEventListener("click", toggleFullscreen);
+
+    // เกมลูปทำงานอัตโนมัติ
+    function gameLoop() {
+      update();
+      draw();
+      requestAnimationFrame(gameLoop);
+    }
+    gameLoop();
+  </script>
 </body>
 </html>
